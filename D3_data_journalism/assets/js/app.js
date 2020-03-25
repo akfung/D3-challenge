@@ -1,4 +1,3 @@
-// @TODO: YOUR CODE HERE!
 // svg dimensions
 let svgHeight = 700,
     svgWidth = 1000;
@@ -38,55 +37,86 @@ d3.csv(csvPath).then(csvData => {
     // test to print data
     console.log(csvData);
 
-    // forEach to convert column values to int
+    let factorsArray = ['healthcare', 'age', 'income', 'poverty', 'smokes', 'obesity'];
+    // nested forEach to convert column values to int
     csvData.forEach(function(state) {
-        state.poverty = +state.poverty;
-        state.healthcare = +state.healthcare;
-        state.obesity = +state.obesity;
-        state.age = +state.age;
-        state.smokes = +state.smokes;
-        state.income = +state.income;
+        factorsArray.forEach(factor => {
+            state[`${factor}`] = +state[`${factor}`]
+        });
     });
     
     // set x scales for axes
-    let healthcareXScale = d3.scaleLinear()
-    .domain([0, d3.max(csvData, d => d.healthcare)])
-    .range([0, chartWidth]);
 
-    let ageXScale = d3.scaleLinear()
-    .domain([0, d3.max(csvData, d => d.age)])
-    .range([0, chartWidth]);
+    let XScales = {};
 
-    let incomeXScale = d3.scaleLinear()
-    .domain([0, d3.max(csvData, d => d.income)])
-    .range([0, chartWidth]);
+    factorsArray.slice(0, 3).forEach(factor => {
+        XScales[`${factor}`] = d3.scaleLinear()
+        .domain([0, d3.max(csvData, d => d[`${factor}`])])
+        .range([0, chartWidth]);
+
+    });
 
     // set y scales for axes
-    let povertyYScale = d3.scaleLinear()
-    .domain([0, d3.max(csvData, d => d.poverty)])
-    .range([chartHeight, 0]);
+    let YScales = {};
 
-    let smokesYScale = d3.scaleLinear()
-    .domain([0, d3.max(csvData, d => d.smokes)])
-    .range([chartHeight, 0]);
+    factorsArray.slice(3, 7).forEach(factor => {
+        YScales[`${factor}`] = d3.scaleLinear()
+        .domain([0, d3.max(csvData, d => d[`${factor}`])])
+        .range([chartHeight, 0]);
 
-    let obesityYScale = d3.scaleLinear()
-    .domain([0, d3.max(csvData, d => d.obesity)])
-    .range([chartHeight, 0]);
+    });
     
     // create Axes
-    let bottomAxisHealthcare = d3.axisBottom(healthcareXScale);
-    let leftAxisPoverty = d3.axisLeft(povertyYScale);
+    
+    let bottomAxisHealthcare = d3.axisBottom(XScales['healthcare']);
+    let bottomAxisAge = d3.axisBottom(XScales['age']);
+    let bottomAxisIncome = d3.axisBottom(XScales['income']);
+
+    let leftAxisPoverty = d3.axisLeft(YScales['poverty']);
+    let leftAxisSmokes = d3.axisLeft(YScales['smokes']);
+    let leftAxisObesity = d3.axisLeft(YScales['obesity']);
 
     //append axes to svg group
+    
+    //create bottom axis as one continuous group that can slide to different positions
+    let bottomAxisGroup = chartGroup.append('g');
+
+    let bottomAxisPositions = {
+        healthcare : 0,
+        age : chartWidth +200,
+        income: -chartWidth -200
+    };
+    bottomAxisGroup.append('g')
+        .attr('transform', `translate(${bottomAxisPositions['healthcare']}, ${chartHeight})`)
+        .call(bottomAxisHealthcare);
+
+    bottomAxisGroup.append('g')
+        .attr('transform', `translate(${bottomAxisPositions['age']}, ${chartHeight})`)
+        .call(bottomAxisAge);
+
+    bottomAxisGroup.append('g')
+        .attr('transform', `translate(${bottomAxisPositions['income']}, ${chartHeight})`)
+        .call(bottomAxisIncome);
+
     //left
-    chartGroup.append('g')
+
+    let leftAxisGroup = chartGroup.append('g');
+    let leftAxisPositions = {
+        poverty : 0,
+        smokes : chartHeight + 200,
+        obesity : -chartHeight - 200
+    };
+
+    leftAxisGroup.append('g')
         .call(leftAxisPoverty);
 
-    //bottom
-    chartGroup.append('g')
-        .attr('transform', `translate(0, ${chartHeight})`)
-        .call(bottomAxisHealthcare);
+    leftAxisGroup.append('g')
+        .attr('transform', `translate(0, ${leftAxisPositions['smokes']})`)
+        .call(leftAxisSmokes);
+
+    leftAxisGroup.append('g')
+        .attr('transform', `translate(0, ${leftAxisPositions['obesity']})`)
+        .call(leftAxisObesity);
 
     // BIG MONEY TIME MAKE THE CIRCLES
     let stateCircles = chartGroup.selectAll('.stateCircle')
@@ -94,8 +124,8 @@ d3.csv(csvPath).then(csvData => {
         .enter()
         .append('circle')
         .classed('stateCircle', true)
-        .attr('cx', d => healthcareXScale(d.healthcare))
-        .attr('cy', d => povertyYScale(d.poverty))
+        .attr('cx', d => XScales['healthcare'](d['healthcare']))
+        .attr('cy', d => YScales['poverty'](d['poverty']))
         .attr('r', '10');
 
     // add circle text for each state
@@ -105,47 +135,45 @@ d3.csv(csvPath).then(csvData => {
         .append('text')
         .text(d => d.abbr)
         .classed('stateText', true)
-        .attr('x', d => healthcareXScale(d.healthcare))
-        .attr('y', d => povertyYScale(d.poverty))
+        .attr('x', d => XScales['healthcare'](d['healthcare']))
+        .attr('y', d => YScales['poverty'](d['poverty']))
         .attr('font-size', '10px');
 
     //draw axis labels
     // x axis labels
-    chartGroup.append('text')
+    let xLabelObject = {};
+
+    xLabelObject['healthcare'] = chartGroup.append('text')
         .attr('transform', `translate(${chartWidth/2}, ${chartHeight + chartMargins.top - 50})`)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '16px')
+        .classed('active', true)
         .text('% of Households with Healthcare');
     
-    chartGroup.append('text')
+    xLabelObject['age'] = chartGroup.append('text')
         .attr('transform', `translate(${chartWidth/2}, ${chartHeight + chartMargins.top - 30})`)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '16px')
+        .classed('inactive', true)
         .text('Average Household Age');
 
-    chartGroup.append('text')
+    xLabelObject['income'] = chartGroup.append('text')
         .attr('transform', `translate(${chartWidth/2}, ${chartHeight + chartMargins.top - 10})`)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '16px')
+        .classed('inactive', true)
         .text('Average Household Income');
 
     // y axis labels
-    chartGroup.append('text')
-        .attr('transform', `translate(${chartMargins.left - 150}, ${chartHeight/2}) rotate(-90)`)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '16px')
+
+    let yLabelObject = {};
+    yLabelObject['obesity'] = chartGroup.append('text')
+        .attr('transform', `translate(${chartMargins.left - 140}, ${chartHeight/2}) rotate(-90)`)
+        .classed('active', true)
         .text('% of Households with an Obese Adult');
 
-    chartGroup.append('text')
-        .attr('transform', `translate(${chartMargins.left - 170}, ${chartHeight/2}) rotate(-90)`)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '16px')
+    yLabelObject['poverty'] = chartGroup.append('text')
+        .attr('transform', `translate(${chartMargins.left - 160}, ${chartHeight/2}) rotate(-90)`)
+        .classed('inactive', true)
         .text('% of Households in Poverty');
 
-    chartGroup.append('text')
-        .attr('transform', `translate(${chartMargins.left - 190}, ${chartHeight/2}) rotate(-90)`)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '16px')
+    yLabelObject['smokes'] = chartGroup.append('text')
+        .attr('transform', `translate(${chartMargins.left - 180}, ${chartHeight/2}) rotate(-90)`)
+        .classed('inactive', true)
         .text('% of Households with Smokers');
 
     // Let's add tooltips - fun for the whole family
@@ -170,8 +198,53 @@ d3.csv(csvPath).then(csvData => {
 
     });
 
+    // create .on() listener for clicks on axes
+    Object.keys(xLabelObject).forEach(key => {
+        xLabelObject[`${key}`].on('click', function(){
+
+            //move all circle markers
+            stateCircles.transition()
+            .duration(500)
+            .attr('cx', d => XScales[`${key}`](d[`${key}`]));
+
+            //move all text labels
     
+            stateLabels.transition()
+            .duration(500)
+            .attr('x', d => XScales[`${key}`](d[`${key}`]));
+
+            // move axes on click
+            bottomAxisGroup.transition()
+            .duration(500)
+            .attr('transform', `translate(${bottomAxisPositions[key]}, 0)`);
+        
+    });
+
+    });
     
+    // create .on() listener for clicks on Y axes
+    Object.keys(yLabelObject).forEach(key => {
+        yLabelObject[`${key}`].on('click', function(){
+
+            //move all circle markers
+            stateCircles.transition()
+            .duration(500)
+            .attr('cy', d => YScales[`${key}`](d[`${key}`]));
+
+            //move all text labels
+    
+            stateLabels.transition()
+            .duration(500)
+            .attr('y', d => YScales[`${key}`](d[`${key}`]))
+
+            // move axes on click
+            leftAxisGroup.transition()
+            .duration(500)
+            .attr('transform', `translate(0, ${leftAxisPositions[key]})`)
+        
+    });
+
+    });
 }
     ).catch(function(error) {
         console.log(error);
