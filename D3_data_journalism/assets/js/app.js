@@ -34,8 +34,6 @@ let chartGroup = svg.append('g')
 // read csv and draw
 let csvPath = './assets/data/data.csv';
 d3.csv(csvPath).then(csvData => {
-    // test to print data
-    console.log(csvData);
 
     let factorsArray = ['healthcare', 'age', 'income', 'poverty', 'smokes', 'obesity'];
     // nested forEach to convert column values to int
@@ -241,6 +239,8 @@ d3.csv(csvPath).then(csvData => {
             leftAxisGroup.transition()
             .duration(500)
             .attr('transform', `translate(0, ${leftAxisPositions[key]})`)
+
+            //change active axes text
         
     });
 
