@@ -4,6 +4,7 @@
   text-anchor: middle;
 }
 
+/* active and inactive classes for axes */
 .active {
   font-weight: bold;
   fill: #000;
@@ -24,7 +25,7 @@
   cursor: pointer;
 }
 
-/* font size dependent on radius, see app.js */
+/* css classes for data markers. font size dependent on radius, see app.js */
 .stateText {
   font-family: sans-serif;
   fill: #fff;
@@ -42,6 +43,7 @@
   margin: 0;
 }
 
+/* tooltip css classes */
 .d3-tip {
   padding: 6px;
   font-size: 12px;
