@@ -276,7 +276,5 @@ d3.csv(csvPath).then(csvData => {
         console.log(error);
     });
     
-// makeResponsive();
-// d3.select(window).on("resize", makeResponsive);
 
 
