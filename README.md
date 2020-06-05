@@ -1,3 +1,1 @@
-# low-income-visualization
-
-This project visualizes metrics such as healthcare access, poverty, and income data in low income areas using d3 for DOM manipulation. 
+This interactive visualization compares risk metrics such as healthcare access, poverty, and income data in low income areas to health outcomes using d3 for DOM manipulation. Axes are clickable for animated data replotting along with pop-up tooltips. Data is requested as a js promise from a .csv file, so index.html must be opened through a local testing server (python -m http.server).
