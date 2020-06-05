@@ -116,7 +116,7 @@ d3.csv(csvPath).then(csvData => {
         .attr('transform', `translate(0, ${leftAxisPositions['obesity']})`)
         .call(leftAxisObesity);
 
-    // BIG MONEY TIME MAKE THE CIRCLES
+    // append svg circle objects
     let stateCircles = chartGroup.selectAll('.stateCircle')
         .data(csvData)
         .enter()
@@ -180,9 +180,11 @@ d3.csv(csvPath).then(csvData => {
         .classed('y-axis-label', true)
         .text('% of Households with Smokers');
 
-    // Let's add tooltips - fun for the whole family
+    // Add tooltips
     // create tooltip and call to svg chart area
-    let toolTip = d3.tip()
+
+
+    toolTip = d3.tip()
         .attr('class', 'd3-tip')
         .offset([120,80])
         .html(function(d) {
