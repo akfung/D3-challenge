@@ -96,7 +96,7 @@ d3.csv(csvPath).then(csvData => {
         .attr('transform', `translate(${bottomAxisPositions['income']}, ${chartHeight})`)
         .call(bottomAxisIncome);
 
-    //left
+    //left axes group
 
     let leftAxisGroup = chartGroup.append('g');
     let leftAxisPositions = {
@@ -137,23 +137,26 @@ d3.csv(csvPath).then(csvData => {
         .attr('y', d => YScales['poverty'](d['poverty']))
         .attr('font-size', '10px');
 
-    //draw axis labels
+    //write axis labels
     // x axis labels
     let xLabelObject = {};
 
     xLabelObject['healthcare'] = chartGroup.append('text')
         .attr('transform', `translate(${chartWidth/2}, ${chartHeight + chartMargins.top - 50})`)
         .classed('active', true)
+        .classed('x-axis-label', true)
         .text('% of Households with Healthcare');
     
     xLabelObject['age'] = chartGroup.append('text')
         .attr('transform', `translate(${chartWidth/2}, ${chartHeight + chartMargins.top - 30})`)
         .classed('inactive', true)
+        .classed('x-axis-label', true)
         .text('Average Household Age');
 
     xLabelObject['income'] = chartGroup.append('text')
         .attr('transform', `translate(${chartWidth/2}, ${chartHeight + chartMargins.top - 10})`)
         .classed('inactive', true)
+        .classed('x-axis-label', true)
         .text('Average Household Income');
 
     // y axis labels
@@ -162,16 +165,19 @@ d3.csv(csvPath).then(csvData => {
     yLabelObject['obesity'] = chartGroup.append('text')
         .attr('transform', `translate(${chartMargins.left - 140}, ${chartHeight/2}) rotate(-90)`)
         .classed('active', true)
+        .classed('y-axis-label', true)
         .text('% of Households with an Obese Adult');
 
     yLabelObject['poverty'] = chartGroup.append('text')
         .attr('transform', `translate(${chartMargins.left - 160}, ${chartHeight/2}) rotate(-90)`)
         .classed('inactive', true)
+        .classed('y-axis-label', true)
         .text('% of Households in Poverty');
 
     yLabelObject['smokes'] = chartGroup.append('text')
         .attr('transform', `translate(${chartMargins.left - 180}, ${chartHeight/2}) rotate(-90)`)
         .classed('inactive', true)
+        .classed('y-axis-label', true)
         .text('% of Households with Smokers');
 
     // Let's add tooltips - fun for the whole family
@@ -196,7 +202,7 @@ d3.csv(csvPath).then(csvData => {
 
     });
 
-    // create .on() listener for clicks on axes
+    // create .on() listener for clicks on X axes
     Object.keys(xLabelObject).forEach(key => {
         xLabelObject[`${key}`].on('click', function(){
 
@@ -215,6 +221,18 @@ d3.csv(csvPath).then(csvData => {
             bottomAxisGroup.transition()
             .duration(500)
             .attr('transform', `translate(${bottomAxisPositions[key]}, 0)`);
+
+            //change which axes label is highlighted
+            d3.selectAll('.x-axis-label')
+            .classed('active', false)
+            .classed('inactive', true); //set all axes to inactive
+
+            d3.select(this)
+            .classed('inactive', false)
+            .classed('active', true); // set clicked axes title as true
+
+
+
         
     });
 
@@ -240,8 +258,14 @@ d3.csv(csvPath).then(csvData => {
             .duration(500)
             .attr('transform', `translate(0, ${leftAxisPositions[key]})`)
 
-            //change active axes text
-        
+            //change which axes label is highlighted
+            d3.selectAll('.y-axis-label')
+            .classed('active', false)
+            .classed('inactive', true); //set all axes to inactive
+
+            d3.select(this)
+            .classed('inactive', false)
+            .classed('active', true); // set clicked axes title as true
     });
 
     });
